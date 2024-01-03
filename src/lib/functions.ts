@@ -10,19 +10,33 @@ import {
 } from "./constants";
 
 export const getPlaylists = async (token: string): Promise<Playlists> => {
-  const response = await axios.get(PLAYLISTS_ENDPOINT, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  try {
+    const response = await axios.get(PLAYLISTS_ENDPOINT, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-  // @ts-expect-error full type is very large hence we are only using a subset of it
-  return response.data?.items.map((item) => ({
-    id: item.id,
-    name: item.name,
-    image_url: item.images[0].url,
-    num_tracks: item.tracks.total,
-  })) satisfies Playlists;
+    // @ts-expect-error full type is very large hence we are only using a subset of it
+    return response.data?.items.map((item) => {
+      const image = item?.images;
+      let image_url = "";
+      if (image.length === 0) {
+        image_url = "https://via.placeholder.com/150";
+      } else {
+        image_url = item?.images[0].url;
+      }
+      return {
+        id: item.id,
+        name: item.name,
+        image_url: image_url,
+        num_tracks: item.tracks.total,
+      };
+    }) satisfies Playlists;
+  } catch (err) {
+    console.error(err);
+    return [] satisfies Playlists;
+  }
 };
 
 export const getProfile = async (token: string): Promise<UserProfile> => {
@@ -31,6 +45,13 @@ export const getProfile = async (token: string): Promise<UserProfile> => {
       Authorization: `Bearer ${token}`,
     },
   });
+
+  if (response.data?.images.length === 0) {
+    return {
+      image_url: "https://via.placeholder.com/150",
+      name: response.data?.display_name,
+    } satisfies UserProfile;
+  }
 
   return {
     image_url: response.data?.images[0]?.url,
@@ -42,20 +63,36 @@ export const getPlaylistTracks = async (
   token: string,
   playlistId: string
 ): Promise<Tracks> => {
-  const response = await axios.get(`${TRACKS_ENDPOINT}${playlistId}/tracks`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  if (playlistId === "" || token === "") {
+    return [] satisfies Tracks;
+  }
+  try {
+    const response = await axios.get(`${TRACKS_ENDPOINT}${playlistId}/tracks`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-  // @ts-expect-error full type is very large hence we are only using a subset of it
-  return response.data?.items.map((item) => ({
-    album: item.track.album.name,
-    artist: item.track.artists[0].name,
-    id: item.track.id,
-    image_url: item.track.album?.images[0].url,
-    name: item.track.name,
-  })) satisfies Tracks;
+    // @ts-expect-error full type is very large hence we are only using a subset of it
+    return response.data?.items.map((item) => {
+      let image_url = "";
+      if (item.track?.album.images.length === 0) {
+        image_url = "https://via.placeholder.com/150";
+      } else {
+        image_url = item.track.album.images[0].url;
+      }
+      return {
+        album: item.track.album.name,
+        artist: item.track.artists[0].name,
+        id: item.track.id,
+        image_url: image_url,
+        name: item.track.name,
+      };
+    }) satisfies Tracks;
+  } catch (err) {
+    console.error(err);
+    return [] satisfies Tracks;
+  }
 };
 
 export const getTokens = async (code: string): Promise<string[]> => {
@@ -86,7 +123,6 @@ export const refreshAccessToken = async () => {
   }
 
   console.log("refreshing access token");
-  console.log(refreshToken);
 
   const response = await axios.post(
     "https://accounts.spotify.com/api/token",

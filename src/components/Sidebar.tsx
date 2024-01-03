@@ -17,7 +17,7 @@ const Sidebar = ({ playlists, setPlaylistId, sidebarState }: Props) => {
       <h6 className="mt-2 text-base text-gray-300 mb-6">Playlists</h6>
       <hr className="border-t-[0.1px] border-gray-600 mb-2" />
       <div className="space-y-4">
-        {playlists.map((playlist, i) => (
+        {playlists && playlists.map((playlist, i) => (
           <PlaylistItem
             key={i}
             name={playlist.name}

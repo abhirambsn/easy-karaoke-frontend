@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import UserPill from "./UserPill";
 import { shuffle } from "lodash";
 import TrackItem from "./TrackItem";
@@ -65,7 +65,7 @@ const Main = ({
   const [currentPlaylist, setCurrentPlaylist] = useState<Playlist>();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setCurrentTrack] = useRecoilState(currentTrack);
-  useEffect(() => {
+  useLayoutEffect(() => {
     setColor(shuffle(colors).pop() as string);
     setCurrentPlaylist(playlists.find((p) => p.id === playlistId));
   }, [playlistId, playlists]);
@@ -132,7 +132,7 @@ const Main = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {pageData.length > 0 &&
+            {pageData && pageData.length > 0 &&
               pageData.map((t, i) => (
                 <TrackItem
                   key={i}
@@ -150,68 +150,58 @@ const Main = ({
           <Pagination>
             <PaginationContent>
               {currentPage !== 1 && (
-                <PaginationItem>
-                  <PaginationPrevious
-                    onClick={() => setCurrentPage(currentPage - 1)}
-                  />
-                </PaginationItem>
+                <PaginationPrevious
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                />
               )}
               {currentPage > 3 ? (
                 <>
-                  <PaginationItem>
-                    <PaginationLink
-                      onClick={() => setCurrentPage(1)}
-                      href="#"
-                      isActive={currentPage === 1}
-                    >
-                      1
-                    </PaginationLink>
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationLink
-                      onClick={() => setCurrentPage(2)}
-                      href="#"
-                      isActive={currentPage === 2}
-                    >
-                      2
-                    </PaginationLink>
-                  </PaginationItem>
+                  <PaginationLink
+                    onClick={() => setCurrentPage(1)}
+                    href="#"
+                    isActive={currentPage === 1}
+                  >
+                    1
+                  </PaginationLink>
+                  <PaginationLink
+                    onClick={() => setCurrentPage(2)}
+                    href="#"
+                    isActive={currentPage === 2}
+                  >
+                    2
+                  </PaginationLink>
                   <PaginationItem>
                     <PaginationEllipsis />
                   </PaginationItem>
-                  <PaginationItem key={totalPages}>
-                    <PaginationLink
-                      onClick={() => setCurrentPage(totalPages)}
-                      href="#"
-                      isActive={currentPage === totalPages}
-                    >
-                      {totalPages}
-                    </PaginationLink>
-                  </PaginationItem>
+                  <PaginationLink
+                    onClick={() => setCurrentPage(totalPages)}
+                    href="#"
+                    key={totalPages}
+                    isActive={currentPage === totalPages}
+                  >
+                    {totalPages}
+                  </PaginationLink>
                 </>
               ) : (
                 <>
                   {Array(totalPages)
                     .fill(1)
                     .map((_, i) => (
-                      <PaginationItem key={i}>
-                        <PaginationLink
-                          onClick={() => setCurrentPage(i + 1)}
-                          href="#"
-                          isActive={currentPage === i + 1}
-                        >
-                          {i + 1}
-                        </PaginationLink>
-                      </PaginationItem>
+                      <PaginationLink
+                        onClick={() => setCurrentPage(i + 1)}
+                        href="#"
+                        key={i}
+                        isActive={currentPage === i + 1}
+                      >
+                        {i + 1}
+                      </PaginationLink>
                     ))}
                 </>
               )}
               {currentPage !== totalPages && (
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                  />
-                </PaginationItem>
+                <PaginationNext
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                />
               )}
             </PaginationContent>
           </Pagination>

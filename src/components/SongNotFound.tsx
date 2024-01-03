@@ -44,10 +44,8 @@ const SongNotFound = ({ song_id, message }: Props) => {
       <CardHeader>
         <CardTitle>{message}</CardTitle>
         <CardDescription>
-          <p>
-            Sorry, we couldn't find the karaoke version of song with the id of{" "}
-            <strong>{song_id}</strong>.
-          </p>
+          Sorry, we couldn't find the karaoke version of song with the id of{" "}
+          <strong>{song_id}</strong>.
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -1,4 +1,4 @@
-import { ChangeEvent, useCallback, useEffect, useState } from "react";
+import { ChangeEvent, useCallback, useLayoutEffect, useState } from "react";
 import { Input } from "./ui/input";
 import { Play, Pause, Mic } from "lucide-react";
 import { Button } from "./ui/button";
@@ -86,7 +86,7 @@ const AudioPlayer = ({ audioRef, audio_url }: Props) => {
     }
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const audio = audioRef.current;
     audio.addEventListener("timeupdate", handleTimeUpdate);
 
@@ -98,7 +98,7 @@ const AudioPlayer = ({ audioRef, audio_url }: Props) => {
       <Input
         type="range"
         min={0}
-        max={duration}
+        max={isNaN(duration) ? 0 : duration}
         value={currentTime}
         onChange={handleSeek}
         className={`${color.replace("bg", "accent")}`}

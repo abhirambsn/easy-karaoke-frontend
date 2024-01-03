@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { getKaraokeUrl } from "@/lib/functions";
 import { shuffle } from "lodash";
 import { ArrowLeft } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { useLayoutEffect, useRef, useState } from "react";
+import { useNavigate, useLocation } from "react-router";
 import { useRecoilState, useRecoilValue } from "recoil";
 
 const colors = [
@@ -30,13 +30,14 @@ const Player = () => {
   const [error, setError] = useState("");
   const audioRef = useRef<HTMLAudioElement>();
   const [color, setColor] = useRecoilState(trackColor);
+  const location = useLocation();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!currentTrackData) return;
     setColor(shuffle(colors).pop() as string);
   }, [currentTrackData, setColor]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!currentTrackData) {
       navigate("/");
       return;
@@ -53,7 +54,7 @@ const Player = () => {
       setLyrics(lyrics);
       setAudioUrl(url);
     })();
-  }, [currentTrackData, navigate]);
+  }, [location, currentTrackData, navigate]);
   return (
     <div className="min-h-screen min-w-screen flex flex-col lg:flex-row">
       {error ? (

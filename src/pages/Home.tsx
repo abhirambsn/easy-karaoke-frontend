@@ -8,12 +8,12 @@ import {
   getTokens,
   getProfile,
 } from "@/lib/functions";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useRecoilState } from "recoil";
+import { useLocation } from "react-router-dom";
 
 const HomePage = () => {
-  const [token, setToken] = useState("");
   const [playlists, setPlaylists] = useState<Playlists>([]);
   const [selectedPlaylist, setSelectedPlaylist] = useState("");
   const [tracks, setTracks] = useState<Tracks>([]);
@@ -23,55 +23,66 @@ const HomePage = () => {
   const [pageData, setPageData] = useState<Tracks>([]);
   const [userProfile, setUserProfile] = useRecoilState(userProfileAtom);
   const [sidebarState, setSidebarState] = useState(false);
+  const [authenticated, setAuthenticated] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
+    setAuthenticated(localStorage.getItem("token") !== null);
+  }, [authenticated]);
+
+  useLayoutEffect(() => {
     (async () => {
-      if (localStorage.getItem("token")) {
-        setToken(localStorage.getItem("token") as string);
+      if (authenticated) {
         return;
       }
       const hash = window.location.search;
 
       const code = hash.substring(1).split("=")[1];
-      console.log("Code", code);
+      if (!code) return;
 
       const [accessToken, refreshToken] = await getTokens(code);
       window.location.search = "";
-      setToken(accessToken);
       localStorage.setItem("refresh_token", refreshToken);
       localStorage.setItem("token", accessToken);
+      setAuthenticated(true);
     })();
-  }, []);
+  }, [authenticated, location]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     (async () => {
+      if (!authenticated) return;
+      const token = localStorage.getItem("token");
       if (token === "" || !token) return;
       const playlists = await getPlaylists(token);
       const profile = await getProfile(token);
       setPlaylists(playlists);
       setUserProfile(profile);
     })();
-  }, [token, setUserProfile]);
+  }, [authenticated, setUserProfile]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     (async () => {
+      if (!authenticated) return;
+      const token = localStorage.getItem("token");
       if (selectedPlaylist === "" || token === "" || !token) return;
       const pTracks = await getPlaylistTracks(token, selectedPlaylist);
       setTotalPages(Math.ceil(pTracks.length / 10));
       setTracks(pTracks);
     })();
-  }, [selectedPlaylist, token]);
+  }, [authenticated, selectedPlaylist]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    if (!authenticated) return;
     if (tracks.length === 0) return;
     const start = (currentPage - 1) * 10;
     const end = start + 10;
     setPageData(tracks.slice(start, end));
-  }, [currentPage, token, tracks]);
+  }, [currentPage, tracks, authenticated]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    if (!authenticated) return;
     if (search === "") {
       const start = (currentPage - 1) * 10;
       const end = start + 10;
@@ -82,10 +93,10 @@ const HomePage = () => {
       t.name.toLowerCase().includes(search.toLowerCase())
     );
     setPageData(filteredTracks);
-  }, [search, tracks, currentPage]);
+  }, [authenticated, search, tracks, currentPage]);
 
   const logout = () => {
-    setToken("");
+    setAuthenticated(false);
     setPlaylists([]);
     setSelectedPlaylist("");
     setTracks([]);
@@ -93,6 +104,7 @@ const HomePage = () => {
     setCurrentPage(1);
     setSearch("");
     setPageData([]);
+    setUserProfile({} as UserProfile);
     localStorage.removeItem("token");
     localStorage.removeItem("refresh_token");
     navigate("/", { replace: true });
@@ -100,7 +112,7 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen min-w-screen">
-      {!token ? (
+      {!authenticated ? (
         <div className="h-screen w-screen flex items-center justify-center">
           <LoginForm />
         </div>
@@ -128,7 +140,6 @@ const HomePage = () => {
               setSidebarState={setSidebarState}
             />
           </main>
-          {/* <button onClick={logout}>Logout</button> */}
         </div>
       )}
     </div>

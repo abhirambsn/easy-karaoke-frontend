@@ -28,7 +28,7 @@ const UserPill = ({ name, image_url, logout }: Props) => {
               className="border border-gray-300 rounded-full"
               src={image_url}
             />
-            <AvatarFallback>{name[0]}</AvatarFallback>
+            <AvatarFallback>{name}</AvatarFallback>
           </Avatar>
           <span className="text-light">{name}</span>
         </DropdownMenuLabel>
