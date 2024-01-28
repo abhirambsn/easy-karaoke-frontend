@@ -76,7 +76,7 @@ const Main = ({
   };
 
   return (
-    <div className="flex-grow text-white h-screen overflow-y-scroll scrollbar-hide">
+    <div className="flex-grow text-[#0d0420] dark:text-[#e8e6ec] h-screen overflow-y-scroll scrollbar-hide">
       <header className="absolute top-5 right-8">
         <UserPill
           name={userProfile.name}
@@ -93,7 +93,7 @@ const Main = ({
       </section>
 
       <section
-        className={`flex items-start space-x-7 bg-gradient-to-b to-secondary ${color} h-64 text-white p-8 w-full`}
+        className={`flex items-start space-x-7 bg-gradient-to-b to-secondary ${color} h-64 text-[#0d0420] dark:text-[#e8e6ec] p-8 w-full`}
       >
         {currentPlaylist ? (
           <>
