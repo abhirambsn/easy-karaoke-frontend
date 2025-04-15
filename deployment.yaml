@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: typescript-app-deployment
+  labels:
+    app: typescript-app
+spec:
+  replicas: 2 # Adjust as needed
+  selector:
+    matchLabels:
+      app: typescript-app
+  template:
+    metadata:
+      labels:
+        app: typescript-app
+    spec:
+      containers:
+        - name: typescript-app
+          image: your-docker-registry/typescript-app:latest # Replace with your image
+          ports:
+            - containerPort: 3000 # Adjust if your app uses a different port
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+          livenessProbe:
+            httpGet:
+              path: / # Or a health check endpoint
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: / # Or a health check endpoint
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 5
